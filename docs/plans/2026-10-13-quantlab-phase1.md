@@ -1,7 +1,5 @@
 # Quantlab Phase 1 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Build the complete phase-1 research stack: free daily data pipeline, home-grown vectorized backtest engine validated against vectorbt, two ETF strategies, anti-overfitting validation layer, experiment registry, HTML reports, and a first documented research run.
 
 **Architecture:** One Python package `quantlab` in strict layers (data → features → strategies → backtest → validation/portfolio → research/reports → cli). Strategies output target weights only; the engine applies the t → t+1 execution lag. Every backtest is a pure function of a hashed config and immutable Parquet data.
@@ -17,7 +15,7 @@
 - No network calls in the test suite. Network integration tests are marked `@pytest.mark.network` and deselected by default.
 - `data/`, `research/experiments.duckdb`, `reports/output/` are gitignored.
 - Every run requires a registered hypothesis with a written economic rationale.
-- Commit after every task with a conventional-commit message ending in `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
+- Commit after every task with a conventional-commit message.
 
 ---
 

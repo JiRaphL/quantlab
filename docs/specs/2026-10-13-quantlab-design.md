@@ -1,7 +1,7 @@
 # Quantlab — design du fonds quantitatif personnel
 
 Date : 2026-10-13
-Statut : validé en brainstorming (sections 1 et 2 approuvées explicitement, sections 3 et 4 fixées par Claude avec mandat de l'utilisateur).
+Statut : validé.
 
 ## 1. Objectifs et non-objectifs
 
@@ -14,7 +14,7 @@ Statut : validé en brainstorming (sections 1 et 2 approuvées explicitement, se
 - Intraday et haute fréquence.
 - Données Twitter/X et imagerie satellite (coût, signal arbitré).
 - Gestion d'argent de tiers. Ce n'est pas un fonds au sens légal, c'est un compte personnel.
-- Claude ne passe jamais d'ordres réels et ne donne pas de conseil d'investissement personnalisé. Il construit la recherche, le backtest, le paper trading et les signaux ; l'utilisateur exécute.
+- Le système ne passe jamais d'ordres réels automatiquement : il produit la recherche, le backtest, le paper trading et les signaux ; l'exécution est manuelle et décidée par le gérant.
 
 **Contraintes :**
 - Univers : ETF et actions US. Broker : Interactive Brokers (IBKR), compte paper trading d'abord.
