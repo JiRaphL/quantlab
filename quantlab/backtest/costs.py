@@ -37,3 +37,5 @@ class CostModel:
 
 
 ZERO_COST = CostModel(commission_per_share=0.0, min_commission=0.0, slippage_bps=0.0)
+
+IBKR_DEFAULT = CostModel()
