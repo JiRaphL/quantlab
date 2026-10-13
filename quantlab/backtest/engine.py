@@ -47,9 +47,15 @@ def run_backtest(
     initial_capital: float = 100_000.0,
     execution_lag: int = 1,
     config: dict | None = None,
+    rebalance_band: float = 0.0,
 ) -> BacktestResult:
+    """``rebalance_band``: on an execution date, trade only if some asset's weight deviates
+    from its target by more than this amount (absolute weight). 0 = always rebalance.
+    Bands cut turnover a lot for strategies whose targets barely move month to month."""
     if execution_lag < 0:
         raise ValueError("execution_lag must be >= 0")
+    if rebalance_band < 0:
+        raise ValueError("rebalance_band must be >= 0")
 
     index = panel.index
     symbols = panel.symbols
@@ -94,7 +100,7 @@ def run_backtest(
             delta = target - w
             turnover = float(np.abs(delta).sum())
             cost_frac = float((np.abs(delta) * cost_rates[t]).sum())
-            if turnover > WEIGHT_TOL:
+            if turnover > WEIGHT_TOL and float(np.abs(delta).max()) > rebalance_band:
                 nav_before = nav
                 nav *= 1.0 - cost_frac
                 turnover_out[t] = turnover

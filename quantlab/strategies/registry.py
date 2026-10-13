@@ -6,10 +6,12 @@ from __future__ import annotations
 from quantlab.strategies.base import Strategy
 from quantlab.strategies.dual_momentum import DualMomentum
 from quantlab.strategies.equal_weight import EqualWeight
+from quantlab.strategies.vol_scaled_momentum import VolScaledMomentum
 
 REGISTRY: dict[str, type[Strategy]] = {
     EqualWeight.name: EqualWeight,
     DualMomentum.name: DualMomentum,
+    VolScaledMomentum.name: VolScaledMomentum,
 }
 
 

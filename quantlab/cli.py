@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from quantlab.backtest.benchmarks import buy_and_hold_weights
+from quantlab.backtest.benchmarks import buy_and_hold_weights, fixed_weights
 from quantlab.backtest.engine import run_backtest
 from quantlab.config import BacktestConfig
 from quantlab.data.store import PriceStore
@@ -124,13 +124,18 @@ def cmd_run(args: argparse.Namespace) -> int:
         cfg.initial_capital,
         cfg.execution_lag,
         config={**strategy.describe(), "config_hash": config_hash},
+        rebalance_band=cfg.rebalance_band,
     )
     metrics = compute_metrics(result.returns, turnover=result.turnover, costs=result.costs)
 
-    bench_name = cfg.benchmark
+    bench_name = cfg.benchmark_name()
+    if isinstance(cfg.benchmark, str):
+        bench_weights = buy_and_hold_weights(panel, cfg.benchmark)
+    else:
+        bench_weights = fixed_weights(panel, cfg.benchmark)
     benchmark = run_backtest(
         panel,
-        buy_and_hold_weights(panel, bench_name),
+        bench_weights,
         cost_model,
         cfg.rebalance,
         cfg.initial_capital,
@@ -145,6 +150,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         cfg.execution_lag,
     )
     ew_metrics = compute_metrics(ew.returns, turnover=ew.turnover, costs=ew.costs)
+    bench_metrics = compute_metrics(
+        benchmark.returns, turnover=benchmark.turnover, costs=benchmark.costs
+    )
 
     extra: dict = {
         "groups": {s.symbol: s.asset_class for s in universe.symbols},
@@ -165,17 +173,27 @@ def cmd_run(args: argparse.Namespace) -> int:
         grid = strategy_cls.param_grid_default()
         fixed = {k: v for k, v in cfg.params.items() if k not in grid}
         print(f"Balayage de grille : {grid}")
-        sweep = grid_sweep(panel, strategy_cls, grid, cost_model, cfg.rebalance, fixed_params=fixed)
+        sweep = grid_sweep(
+            panel,
+            strategy_cls,
+            grid,
+            cost_model,
+            cfg.rebalance,
+            fixed_params=fixed,
+            rebalance_band=cfg.rebalance_band,
+        )
         extra["sweep"] = sweep
         axes = sorted(grid, key=lambda k: -len(grid[k]))[:2]
         if len(axes) == 2:
             extra["sweep_axes"] = (axes[0], axes[1])
         n_trials += len(sweep)
         share_beats_ew = float((sweep["sharpe"] > ew_metrics.sharpe).mean())
+        share_beats_bench = float((sweep["sharpe"] > bench_metrics.sharpe).mean())
         extra["notes"].append(
             f"Grille de {len(sweep)} combinaisons : Sharpe médian {sweep['sharpe'].median():.2f}, "
             f"min {sweep['sharpe'].min():.2f}, max {sweep['sharpe'].max():.2f} ; "
-            f"{share_beats_ew:.0%} des combinaisons battent le Sharpe de l'équipondéré."
+            f"{share_beats_ew:.0%} des combinaisons battent le Sharpe de l'équipondéré, "
+            f"{share_beats_bench:.0%} celui du benchmark {bench_name}."
         )
     if args.walk_forward:
         grid = strategy_cls.param_grid_default()
@@ -190,6 +208,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             train_years=args.train_years,
             test_years=1,
             fixed_params=fixed,
+            rebalance_band=cfg.rebalance_band,
         )
         extra["walk_forward"] = wf
         n_trials += wf.n_trials
@@ -225,6 +244,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             cfg.rebalance,
             cfg.execution_lag,
             config=strategy.describe(),
+            rebalance_band=cfg.rebalance_band,
         )
         extra["real_capital"] = rc
 

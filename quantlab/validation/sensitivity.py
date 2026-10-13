@@ -34,6 +34,7 @@ def grid_sweep(
     score_start: pd.Timestamp | None = None,
     score_end: pd.Timestamp | None = None,
     combos: Iterable[dict] | None = None,
+    rebalance_band: float = 0.0,
 ) -> pd.DataFrame:
     """Run every combination of ``grid`` (merged with ``fixed_params``) and return a
     DataFrame with one row per combination: the parameters, then the metrics.
@@ -44,7 +45,13 @@ def grid_sweep(
     fixed = fixed_params or {}
     for params in combos if combos is not None else grid_combinations(grid):
         strategy = strategy_cls(**fixed, **params)
-        result = run_backtest(panel, strategy.target_weights(panel), cost_model, rebalance)
+        result = run_backtest(
+            panel,
+            strategy.target_weights(panel),
+            cost_model,
+            rebalance,
+            rebalance_band=rebalance_band,
+        )
         scored = result.slice(score_start, score_end)
         metrics = compute_metrics(scored.returns, turnover=scored.turnover, costs=scored.costs)
         rows.append({**params, **metrics.as_dict()})

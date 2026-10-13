@@ -35,7 +35,14 @@ class BacktestConfig(BaseModel):
     cost: CostConfig = Field(default_factory=CostConfig)
     initial_capital: float = 100_000.0
     execution_lag: int = 1
-    benchmark: str = "SPY"
+    rebalance_band: float = 0.0
+    benchmark: str | dict[str, float] = "SPY"
+
+    def benchmark_name(self) -> str:
+        if isinstance(self.benchmark, str):
+            return self.benchmark
+        return "/".join(f"{int(round(v * 100))} {k}" for k, v in self.benchmark.items())
+
     provider: str = "yfinance"
 
     def canonical_json(self) -> str:

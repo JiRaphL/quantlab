@@ -1,0 +1,23 @@
+# H2 : dual momentum ajusté de la volatilité, cible de volatilité 10 %, bandes de rebalancement.
+# Paramètres de base et grille fixés AVANT tout test (voir docs/research/journal.md, H2).
+strategy: vol_scaled_momentum
+params:
+  lookback: 252
+  skip: 21
+  vol_window: 63
+  top_n: 3
+  absolute_filter: true
+  safe_asset: IEF
+  target_vol: 0.10
+universe: etf_core
+start: 2007-06-01
+end: 2026-10-10
+rebalance: monthly
+rebalance_band: 0.05   # on ne traite que si un poids s'écarte de plus de 5 points de sa cible
+cost:
+  commission_per_share: 0.005
+  min_commission: 1.0
+  slippage_bps: 5.0
+initial_capital: 100000
+execution_lag: 1
+benchmark: {SPY: 0.6, IEF: 0.4}

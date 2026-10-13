@@ -74,6 +74,7 @@ def walk_forward(
     score: str = "sharpe",
     fixed_params: dict | None = None,
     warmup_days: int = 300,
+    rebalance_band: float = 0.0,
 ) -> WalkForwardResult:
     years = sorted(set(panel.index.year))
     first_year = years[0]
@@ -106,6 +107,7 @@ def walk_forward(
             score_start=train_start,
             score_end=train_end,
             combos=combos,
+            rebalance_band=rebalance_band,
         )
         n_trials += len(sweep)
         best_row = sweep.sort_values(score, ascending=False).iloc[0]
@@ -114,7 +116,11 @@ def walk_forward(
         test_panel = panel.slice(test_start - pd.Timedelta(days=warmup_days * 2), test_end)
         strategy = strategy_cls(**(fixed_params or {}), **best_params)
         result = run_backtest(
-            test_panel, strategy.target_weights(test_panel), cost_model, rebalance
+            test_panel,
+            strategy.target_weights(test_panel),
+            cost_model,
+            rebalance,
+            rebalance_band=rebalance_band,
         )
         test_slice = result.slice(test_start, test_end)
         test_metrics = compute_metrics(

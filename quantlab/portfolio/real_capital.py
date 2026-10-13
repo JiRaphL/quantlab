@@ -30,6 +30,7 @@ def simulate_real_capital(
     rebalance: Rebalance = "monthly",
     execution_lag: int = 1,
     config: dict | None = None,
+    rebalance_band: float = 0.0,
 ) -> BacktestResult:
     index, symbols = panel.index, panel.symbols
     n_dates, n_assets = len(index), len(symbols)
@@ -72,7 +73,8 @@ def simulate_real_capital(
             new_pos = np.where(traded, new_value, position_value)
             turnover = float(np.abs(new_pos / nav - old_w).sum()) if nav > 0 else 0.0
             cost_frac = alloc.commissions / nav if nav > 0 else 0.0
-            if traded.any():
+            deviation = float(np.abs(target.to_numpy() - old_w).max())
+            if traded.any() and deviation > rebalance_band:
                 cash = nav - new_pos.sum() - alloc.commissions
                 position_value = new_pos
                 # gross twin: same shares, no commissions
