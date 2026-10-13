@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Données locales (jamais versionnées)
+data/
+research/experiments.duckdb
+reports/output/
+
+# Secrets
+.env
+
+# OS / IDE
+.DS_Store
+.ipynb_checkpoints/
