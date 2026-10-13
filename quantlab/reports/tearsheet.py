@@ -60,14 +60,14 @@ def _fmt(value, kind: str) -> str:
 
 def _layout(title: str, height: int = 380, **kw) -> dict:
     base = dict(
-        title=dict(text=title, font=dict(size=15, color=TEXT)),
+        title=dict(text=title, font=dict(size=15, color=TEXT), y=0.97, yanchor="top"),
         paper_bgcolor=SURFACE,
         plot_bgcolor=SURFACE,
         font=dict(color=TEXT2, size=12),
-        margin=dict(l=50, r=20, t=50, b=40),
+        margin=dict(l=50, r=20, t=80, b=40),
         height=height,
         hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
         xaxis=dict(gridcolor=GRID, zeroline=False),
         yaxis=dict(gridcolor=GRID, zeroline=False),
     )
@@ -136,7 +136,7 @@ def fig_weights(result: BacktestResult, groups: dict[str, str] | None = None) ->
         w = w.T.groupby(lambda s: groups.get(s, "autre")).sum().T
     w["Cash"] = (1.0 - w.sum(axis=1)).clip(lower=0.0)
     # Weekly resampling keeps the file small without changing the picture.
-    w = w.resample("W-FRI").last().dropna(how="all")
+    w = w.resample("ME").last().dropna(how="all")
     palette = SERIES + BLUE_RAMP
     fig = go.Figure()
     for i, col in enumerate(w.columns):
@@ -152,7 +152,7 @@ def fig_weights(result: BacktestResult, groups: dict[str, str] | None = None) ->
                 hovertemplate="%{y:.1%}",
             )
         )
-    fig.update_layout(**_layout("Allocation dans le temps (poids de fin de semaine)", 380))
+    fig.update_layout(**_layout("Allocation dans le temps (poids de fin de mois)", 380))
     fig.update_yaxes(tickformat=".0%", range=[0, 1])
     return fig
 

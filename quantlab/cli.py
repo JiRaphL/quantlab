@@ -167,14 +167,15 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"Balayage de grille : {grid}")
         sweep = grid_sweep(panel, strategy_cls, grid, cost_model, cfg.rebalance, fixed_params=fixed)
         extra["sweep"] = sweep
-        axes = list(grid)[:2]
+        axes = sorted(grid, key=lambda k: -len(grid[k]))[:2]
         if len(axes) == 2:
             extra["sweep_axes"] = (axes[0], axes[1])
         n_trials += len(sweep)
-        share_positive = float((sweep["sharpe"] > 0).mean())
+        share_beats_ew = float((sweep["sharpe"] > ew_metrics.sharpe).mean())
         extra["notes"].append(
             f"Grille de {len(sweep)} combinaisons : Sharpe médian {sweep['sharpe'].median():.2f}, "
-            f"{share_positive:.0%} des combinaisons ont un Sharpe positif."
+            f"min {sweep['sharpe'].min():.2f}, max {sweep['sharpe'].max():.2f} ; "
+            f"{share_beats_ew:.0%} des combinaisons battent le Sharpe de l'équipondéré."
         )
     if args.walk_forward:
         grid = strategy_cls.param_grid_default()
